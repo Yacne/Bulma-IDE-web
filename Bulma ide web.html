@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulma IDE Web</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e1e; /* لون خلفية المحرر */
+    color: #d4d4d4; /* لون النص */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100%;
+		width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+        overflow: hidden; /* Prevent scrolling */
+}
+
+
+nav {
+    display: flex;
+    align-items: center;
+    background-color: #252526; /* لون خلفية شريط التنقل */
+    height: 15px;
+    padding:  10px;
+    color: white; /* لون النص */
+    z-index: 1; 
+}
+
+nav button {
+    background-color: transparent;
+    color: white; /* لون الأزرار */
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-left: auto;
+}
+
+nav button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+    font-size: 25px;
+    font-weight: bold;
+    margin-left: 15px;
+}
+
+.menu-btn {
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.container {
+    display: flex;
+    height: calc(100vh - 40px); /* كامل الارتفاع ما عدا شريط النافبار */
+    position: relative;
+		 z-index: 1; 
+}
+
+
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 0;
+    transition: transform 0.3s ease;
+    transform: translateX(-250px);
+    position: absolute;
+    top: 35px;
+    bottom: 0;
+    z-index: 2;
+}
+
+.sidebar.active {
+    transform: translateX(0);
+}
+
+.sidebar i {
+    margin-left: 20px;
+    font-size: 40px; /* تكبير حجم الأيقونات */
+    vertical-align: middle;
+}
+
+.sidebar .item {
+    margin-bottom: 30px; /* تباعد بين عناصر القائمة الجانبية */
+}
+
+.sidebar .item .text {
+    font-size: 20px; /* تكبير حجم النصوص */
+    font-weight: bold;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 15px;
+		margin-bottom: 30px;
+}
+
+.header img {
+    width: 60px;
+    height: 35px;
+}
+
+
+
+#editor {
+    width: 100%;
+    height: 100%;
+}
+
+		
+		.toolbar {
+    background-color: #252526; /* لون خلفية شريط الأدوات */
+    color: white;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 5px;
+    height: 25px;
+    position: absolute;
+    top: 35px; /* يجب أن يكون أعلى من شريط التنقل */
+    width: 100%;
+    z-index: 1; /* ضبط z-index للتأكد من عرض شريط الأدوات أعلى من المحرر */
+}
+
+.run-btn {
+    background-color: transparent;
+    color: white;
+    border: none;
+    font-size: 25px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-left: auto;
+}
+
+.run-btn i {
+    color: green ;
+}
+
+.run-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+		
+
+.editor-container {
+    flex-grow: 1;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+		height: 100%;
+    z-index: 2; /* ضبط z-index لـ المحرر ليكون أعلى من iframe */
+}
+		
+.monaco-editor {
+    background-color: #1e1e1e; /* لون خلفية المحرر */
+    color: #d4d4d4; /* لون النص */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100%;
+		width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; 
+}
+		
+		
+		
+		
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-btn {
+    background-color: #252526; /* لون خلفية الزر في القائمة المنسدلة */
+    color: white; /* لون النص في الزر في القائمة المنسدلة */
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #333;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: white; /* لون النص في القائمة المنسدلة */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+}
+
+.dropdown-content a:hover {
+    background-color: #1e90ff;
+}
+
+.search-container {
+    display: none;
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #252526; /* لون خلفية البحث */
+    padding: 20px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 3;
+    width: 300px;
+    border-radius: 10px;
+}
+
+.settings-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #252526; /* لون خلفية إعدادات الصفحة */
+    padding: 20px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 3;
+    width: 300px;
+    border-radius: 10px;
+    border: 1px solid black;
+    color: white;
+    font-size: 16px;
+}
+
+.settings-container.active {
+    display: block;
+}
+
+.search-container.active {
+    display: block;
+}
+
+.search-container input {
+    width: calc(100% - 40px);
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.search-container .close-btn,
+.settings-container .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    color: red;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.highlighted-text {
+    background-color: rgba(30, 144, 255, 0.3);
+    border: 1px solid #1e90ff;
+    box-sizing: border-box;
+}
+
+#settings-popup p {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#settings-popup select {
+    background-color: #333;
+    color: white;
+    border: 1px solid white;
+    padding: 5px;
+    margin-bottom: 20px;
+    width: 90%;
+}
+
+#settings-popup label {
+    color: white;
+    margin-bottom: 10px;
+}
+
+#font-size-slider {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#auto-save-checkbox {
+    margin-left: 50px;
+}
+
+.ai-iframe-container {
+    width: 100%;
+    height: 98%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* ضبط z-index لـ iframe */
+}
+
+.nav2 {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 25px; /* تقليص ارتفاع الشريط */
+    background-color: #252526; /* لون خلفية شريط التنقل السفلي */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px; /* تباعد عناصر nav2 بنسبة 14px */
+    z-index: 100
+}
+
+.nav2 button {
+		position: absorb;
+    background-color: transparent;
+    color: white; /* لون النص في شريط التنقل السفلي */
+    border: none;
+    font-size: 25px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-left: auto;
+		padding: 5px 16.7px;
+		
+}
+
+.nav2 button:hover {
+    transform: scale(1.1);
+		position: fixed;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.nav2 .title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+		
+		iframe1 {
+    background-color: black;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    
+}
+
+</style>
+</head>
+<body>
+
+		
+<nav>
+    <div class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+    <div class="title">file.py</div>
+
+		
+		
+    <button class="run-btn" onclick="runCode()"><i class="fas fa-play"></i></button>
+
+    <!-- تعديل هنا -->
+    <img id="toggle-editor-btn" src="https://cdn-icons-png.freepik.com/256/12220/12220306.png?uid=R144261416&ga=GA1.1.1628053241.1719078011" alt="Toggle Editor" width="30" height="30" style="cursor: pointer; position: absolute; right: 60px;" onclick="toggleEditorView()">
+</nav>
+
+
+
+
+<nav class="nav2">
+    <div class="nav2-buttons">
+        <button class="save-btn" id="save-btn" onclick="saveFile()"><i class="fas fa-save"></i></button>
+        <button class="undo-btn" onclick="undo()"><i class="fas fa-undo"></i></button>
+        <button class="redo-btn" onclick="redo()"><i class="fas fa-redo"></i></button>
+        <button class="select-all-btn" onclick="selectAll()"><i class="fas fa-highlighter"></i></button>
+        <button class="cut-btn" onclick="cut()"><i class="fas fa-cut"></i></button>
+        <button class="copy-btn" onclick="copy()"><i class="fas fa-copy"></i></button>
+        <button class="paste-btn" onclick="paste()"><i class="fas fa-paste"></i></button>
+    </div>
+</nav>
+
+    
+<div class="editor-container" id="editor-container">
+    <div id="editor" class="monaco-editor"></div>
+</div>
+<div class="container">
+		<div class="ai-iframe-container" style="display: none;">
+    <iframe id="ai-iframe" src="https://www.blackbox.ai/" frameborder="0" style="width: 100%; height: 100%;"></iframe>
+</div>
+		
+
+    </div>
+    <div class="sidebar" id="sidebar">
+        <div class="header">
+            <img src="https://i.ibb.co/Ydq0VCK/1000072077-removebg-preview.png" alt="B.Y PRO">
+            <span>Bulma IDE Web</span>
+        </div>
+        <div class="item" onclick="toggleFileOptions()">
+            <i class="fas fa-file"></i>
+            <span class="text">File</span>
+        </div>
+        <div class="item" onclick="toggleTerminal()">
+            <i class="fas fa-terminal"></i>
+            <span class="text">Terminal</span>
+        </div>
+        <div class="item" onclick="toggleDebug()">
+            <i class="fas fa-bug"></i>
+            <span class="text">Debug</span>
+        </div>
+        <div class="item" onclick="toggleSearch()">
+            <i class="fas fa-search"></i>
+            <span class="text">Search</span>
+        </div>
+        <div class="item" onclick="toggleSettings()">
+            <i class="fas fa-cog"></i>
+            <span class="text">Settings</span>
+        </div>
+        <div class="item" onclick="exitEditor()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="text">Exit</span>
+        </div>
+    </div>
+		
+
+    <div class="terminal-container" id="terminal-container" style="display: none;">
+        <div id="terminal" style="background-color: black; color: white; height: 100%; padding: 10px; font-family: 'Courier New', Courier, monospace;">
+            B -> Welcome to the terminal!
+        </div>
+    </div>
+
+    <div class="debug-container" id="debug-container" style="display: none;">
+        <div id="debug" style="background-color: black; color: lime; height: 100%; padding: 10px; font-family: 'Courier New', Courier, monospace;">
+            Debug information...
+        </div>
+    </div>
+
+    <div class="search-container" id="search-container">
+        <input type="text" id="search-input" placeholder="Search...">
+        <button class="close-btn" onclick="toggleSearch()">&times;</button>
+    </div>
+
+    <div class="settings-container" id="settings-container">
+        <div id="settings-popup">
+            <p>Settings</p>
+            <input type="checkbox" id="auto-save-checkbox" onchange="toggleAutoSave()">
+            <button class="close-btn" onclick="toggleSettings()">&times;</button>
+        		<label for="theme-select">The appearance:</label>
+<div class="dropdown">
+    <button class="dropdown-btn" onclick="toggleThemeDropdown()">
+        Dark Mode <i class="fas fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content" id="theme-dropdown">
+        <a href="#" onclick="setTheme('dark')">Dark Mode</a>
+        <a href="#" onclick="setTheme('light')">Light Mode</a>
+    </div>
+</div>
+<label for="font-size-slider">Font Size</label>
+<input type="range" id="font-size-slider" min="10" max="30">
+
+<button class="close-btn" onclick="toggleSettings()">&times;</button>
+        		
+        		<div class="dropdown">
+    <button class="dropdown-btn" onclick="toggleAIDropdown()">
+        AI Platform <i class="fas fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content" id="ai-dropdown">
+        <a href="#" onclick="setAI('blackbox')">Blackbox</a>
+        <a href="#" onclick="setAI('chatgpt')">Chat GPT</a>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+
+
+
+		
+<div class="editor-container" id="editor-container">
+    		
+        <div id="editor" class="monaco-editor"></div>
+    		
+<div class="editor-container" id="editor-container">
+    <div id="editor" class="monaco-editor"></div>
+    <div id="terminal">Running code...</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.29.0/min/vs/loader.min.js"></script>
+<script>
+require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.29.0/min/vs' }});
+require(['vs/editor/editor.main'], function() {
+    window.editor = monaco.editor.create(document.getElementById('editor'), {
+        value: [
+            'function helloWorld() {',
+            '\tconsole.log("Hello, world!");',
+            '}'
+        ].join('\n'),
+        language: 'javascript'
+    });
+});
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+}
+
+function runCode() {
+    const code = window.editor.getValue();
+    console.log('Running code:\n', code);
+}
+
+function toggleEditorInterface() {
+    const editorContainer = document.getElementById('editor-container');
+    const terminalContainer = document.getElementById('terminal-container');
+    const debugContainer = document.getElementById('debug-container');
+    if (editorContainer.style.display === 'none') {
+        editorContainer.style.display = 'flex';
+        terminalContainer.style.display = 'none';
+        debugContainer.style.display = 'none';
+    } else {
+        editorContainer.style.display = 'none';
+        terminalContainer.style.display = 'none';
+        debugContainer.style.display = 'none';
+        window.open('https://chatgpt.com/', '_blank');
+    }
+}
+
+function toggleFileOptions() {
+    // Implement file options logic here
+}
+
+function toggleTerminal() {
+    const terminalContainer = document.getElementById('terminal-container');
+    terminalContainer.style.display = terminalContainer.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleDebug() {
+    const debugContainer = document.getElementById('debug-container');
+    debugContainer.style.display = debugContainer.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleSearch() {
+    const searchContainer = document.getElementById('search-container');
+    searchContainer.classList.toggle('active');
+}
+
+function toggleSettings() {
+    const settingsContainer = document.getElementById('settings-container');
+    settingsContainer.classList.toggle('active');
+}
+
+
+
+let theme = 'dark'; // النمط المظلم كافتراضي
+
+function toggleThemeDropdown() {
+    document.getElementById('theme-dropdown').classList.toggle('show');
+}
+
+function setTheme(selectedTheme) {
+    theme = selectedTheme;
+    if (theme === 'dark') {
+        // تعيين نمط مظلم
+        document.body.style.backgroundColor = '#1e1e1e';
+        document.body.style.color = '#d4d4d4';
+        // إلغاء تحديد الخيارات الأخرى
+        document.getElementById('theme-dropdown').querySelectorAll('a').forEach(item => {
+            if (item.textContent.trim() !== 'Dark Mode') {
+                item.style.backgroundColor = '';
+            } else {
+                item.style.backgroundColor = '#1e90ff';
+            }
+        });
+    } else {
+        // تعيين نمط فاتح
+        document.body.style.backgroundColor = '#f0f0f0';
+        document.body.style.color = '#333';
+        // إلغاء تحديد الخيارات الأخرى
+        document.getElementById('theme-dropdown').querySelectorAll('a').forEach(item => {
+            if (item.textContent.trim() !== 'Light Mode') {
+                item.style.backgroundColor = '';
+            } else {
+                item.style.backgroundColor = '#1e90ff';
+            }
+        });
+    }
+    toggleThemeDropdown();
+}
+
+// تحديد النمط المظلم كافتراضيًا
+setTheme('dark');
+
+// إغلاق قائمة السقوط إذا تم النقر خارجها
+window.onclick = function(event) {
+    if (!event.target.matches('.dropdown-btn')) {
+        let dropdowns = document.getElementsByClassName('dropdown-content');
+        for (let dropdown of dropdowns) {
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        }
+    }
+}
+
+
+function exitEditor() {
+    window.close();
+}
+
+function saveFile() {
+    const code = window.editor.getValue();
+    console.log('Saving code:\n', code);
+}
+
+function undo() {
+    window.editor.trigger('keyboard', 'undo', null);
+}
+
+function redo() {
+    window.editor.trigger('keyboard', 'redo', null);
+}
+
+function selectAll() {
+    window.editor.trigger('keyboard', 'editor.action.selectAll', null);
+}
+
+function cut() {
+    window.editor.trigger('keyboard', 'editor.action.clipboardCutAction', null);
+}
+
+function copy() {
+    window.editor.trigger('keyboard', 'editor.action.clipboardCopyAction', null);
+}
+
+function paste() {
+    window.editor.trigger('keyboard', 'editor.action.clipboardPasteAction', null);
+}
+
+function addTab() {
+    console.log('Adding new tab');
+    // Implement add tab logic here
+}
+
+function removeTab() {
+    console.log('Removing current tab');
+    // Implement remove tab logic here
+}
+
+function toggleAutoSave() {
+    const autoSave = document.getElementById('auto-save-checkbox').checked;
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.style.display = autoSave ? 'none' : 'block';
+}
+
+document.getElementById('search-input').addEventListener('input', function() {
+    const searchValue = this.value;
+    const editorModel = window.editor.getModel();
+    const matches = editorModel.findMatches(searchValue, true, false, false, null, true);
+    window.editor.deltaDecorations([], matches.map(match => ({
+        range: match.range,
+        options: { inlineClassName: 'highlighted-text' }
+    })));
+});
+
+
+let editorVisible = true; // يحافظ على حالة المحرر الظاهرة
+
+function toggleEditorView() {
+    const aiIframeContainer = document.querySelector('.ai-iframe-container');
+    const editorContainer = document.getElementById('editor-container');
+    const toggleBtn = document.getElementById('toggle-editor-btn');
+
+    if (editorVisible) {
+        // إظهار ال iframe وإخفاء المحرر
+        aiIframeContainer.style.display = 'block';
+        editorContainer.style.display = 'none';
+        editorVisible = false;
+        toggleBtn.src = 'https://cdn-icons-png.freepik.com/256/10691/10691115.png?uid=R144261416&ga=GA1.1.1628053241.1719078011';
+    } else {
+        // إظهار المحرر وإخفاء ال iframe
+        aiIframeContainer.style.display = 'none';
+        editorContainer.style.display = 'flex';
+        editorVisible = true;
+        toggleBtn.src = 'https://cdn-icons-png.freepik.com/256/12220/12220306.png?uid=R144261416&ga=GA1.1.1628053241.1719078011';
+    }
+}
+function toggleAIDropdown() {
+    document.getElementById('ai-dropdown').classList.toggle('show');
+}
+
+function setAI(selectedAI) {
+    const aiIframe = document.getElementById('ai-iframe');
+    if (selectedAI === 'blackbox') {
+        aiIframe.src = 'https://www.blackbox.ai/';
+    } else if (selectedAI === 'chatgpt') {
+        aiIframe.src = 'https://chatgpt.com/?&&&&&&&&';
+    }
+    toggleAIDropdown(); // Close dropdown after selection
+}
+
+
+function runCode() {
+    const code = window.editor.getValue();
+    
+    // إيقاف تشغيل iframe الحالي إن وجد
+    const aiIframeContainer = document.querySelector('.ai-iframe-container');
+    if (aiIframeContainer) {
+        aiIframeContainer.style.display = 'none';
+    }
+    
+    // إنشاء iframe جديد
+    const newIframe = document.createElement('iframe');
+    newIframe.id = 'ai-iframe';
+    newIframe.srcdoc = `
+
+                
+     document.getElementById('terminal').innerText = ${JSON.stringify(code)};
+  
+    `;
+    newIframe.style.width = '100%';
+    newIframe.style.height = '100%';
+    newIframe.style.position = 'absolute';
+    newIframe.style.top = '0';
+    newIframe.style.left = '0';
+    newIframe.style.zIndex = '1';
+    
+    // إضافة iframe الجديد إلى عنصر الـ .ai-iframe-container
+    const container = document.querySelector('.ai-iframe-container');
+    container.appendChild(newIframe);
+    
+    // إظهار عنصر .ai-iframe-container
+    container.style.display = 'block';
+}
+
+</script>
+</body>
+</html>

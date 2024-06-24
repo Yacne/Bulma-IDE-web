@@ -182,7 +182,10 @@ nav button:hover {
     left: 0;
     z-index: 1; 
 }
-		
+		.monaco-editor {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+}
 		
 		
 		
@@ -424,7 +427,7 @@ nav button:hover {
     </div>
     <div class="sidebar" id="sidebar">
         <div class="header">
-            <img src="https://i.ibb.co/Ydq0VCK/1000072077-removebg-preview.png" alt="B.Y PRO">
+            <img src="https://raw.githubusercontent.com/Yacne/Bulma-IDE-web/main/Bulmaideweb.png">
             <span>Bulma IDE Web</span>
         </div>
         <div class="item" onclick="toggleFileOptions()">
@@ -516,19 +519,18 @@ nav button:hover {
     <div id="terminal">Running code...</div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.29.0/min/vs/loader.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs/loader.min.js"></script>
 <script>
-require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.29.0/min/vs' }});
+require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs' }});
 require(['vs/editor/editor.main'], function() {
     window.editor = monaco.editor.create(document.getElementById('editor'), {
-        value: [
-            'function helloWorld() {',
-            '\tconsole.log("Hello, world!");',
-            '}'
-        ].join('\n'),
-        language: 'javascript'
+        value: `function helloWorld() {\n\tconsole.log('Hello, world!');\n}`,
+        language: 'javascript',
+        theme: 'vs-dark'
     });
 });
+
 
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
@@ -583,9 +585,7 @@ function toggleSettings() {
 
 let theme = 'dark'; // النمط المظلم كافتراضي
 
-function toggleThemeDropdown() {
-    document.getElementById('theme-dropdown').classList.toggle('show');
-}
+
 
 function setTheme(selectedTheme) {
     theme = selectedTheme;
@@ -723,7 +723,7 @@ function setAI(selectedAI) {
     if (selectedAI === 'blackbox') {
         aiIframe.src = 'https://www.blackbox.ai/';
     } else if (selectedAI === 'chatgpt') {
-        aiIframe.src = 'https://chatgpt.com/?&&&&&&&&';
+        aiIframe.src = 'https://chatgpt.com/';
     }
     toggleAIDropdown(); // Close dropdown after selection
 }
@@ -761,6 +761,72 @@ function runCode() {
     // إظهار عنصر .ai-iframe-container
     container.style.display = 'block';
 }
+
+
+
+// Function to toggle settings panel visibility
+function toggleSettings() {
+    var settingsContainer = document.getElementById("settings-container");
+    settingsContainer.classList.toggle("active");
+}
+
+// Function to toggle theme dropdown visibility
+
+// Function to toggle AI dropdown visibility
+function toggleAIDropdown() {
+    var aiDropdown = document.getElementById("ai-dropdown");
+    aiDropdown.classList.toggle("show");
+}
+
+// Function to set the theme
+function setTheme(theme) {
+    // Implement theme change logic here
+    // Example: document.body.classList.toggle('dark-theme', theme === 'dark');
+}
+
+// Function to set the AI platform
+function setAI(aiPlatform) {
+    // Implement AI platform change logic here
+    // Example: console.log('Selected AI Platform:', aiPlatform);
+}
+
+
+
+function toggleThemeDropdown() {
+    var themeDropdown = document.getElementById("theme-dropdown");
+    themeDropdown.classList.toggle("show");
+}
+
+function setTheme(selectedTheme) {
+    theme = selectedTheme;
+    if (theme === 'dark') {
+        // تعيين نمط مظلم
+        document.body.style.backgroundColor = '#1e1e1e';
+        document.body.style.color = '#d4d4d4';
+        // إلغاء تحديد الخيارات الأخرى
+        document.getElementById('theme-dropdown').querySelectorAll('a').forEach(item => {
+            if (item.textContent.trim() !== 'Dark Mode') {
+                item.style.backgroundColor = '';
+            } else {
+                item.style.backgroundColor = '#1e90ff';
+            }
+        });
+    } else {
+        // تعيين نمط فاتح
+        document.body.style.backgroundColor = '#f0f0f0';
+        document.body.style.color = '#333';
+        // إلغاء تحديد الخيارات الأخرى
+        document.getElementById('theme-dropdown').querySelectorAll('a').forEach(item => {
+            if (item.textContent.trim() !== 'Light Mode') {
+                item.style.backgroundColor = '';
+            } else {
+                item.style.backgroundColor = '#1e90ff';
+            }
+        });
+    }
+    toggleThemeDropdown(); // Toggle dropdown visibility after theme change
+}
+
 
 </script>
 </body>
